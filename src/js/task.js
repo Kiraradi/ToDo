@@ -36,6 +36,22 @@ export default class Task {
     toDoTitle.textContent = task;
     toDoTask.appendChild(toDoTitle);
 
+    const taskChangeInput = document.createElement("form");
+    taskChangeInput.classList.add('task__change');
+    const taskInputChange = document.createElement("input");
+    taskInputChange.setAttribute('type','text');
+    taskInputChange.classList.add('task__input__change');
+    taskChangeInput.appendChild(taskInputChange);
+    const taskInputButton = document.createElement('button');
+    taskInputButton.setAttribute('type','submit');
+    taskInputButton.classList.add('task__input__button');
+    taskChangeInput.appendChild(taskInputButton);
+    toDoTask.appendChild(taskChangeInput);
+
+    const taskChange = document.createElement("div");
+    taskChange.classList.add("change");
+    toDoTask.appendChild(taskChange);
+    
     const taskCheck = document.createElement("div");
     taskCheck.classList.add("checkbox");
     toDoTask.appendChild(taskCheck);
@@ -48,17 +64,19 @@ export default class Task {
     this.tasksList.appendChild(toDoTask);
     this.tasksInput.value = "";
 
+    taskInputButton.addEventListener('click', () => {
+      //metod
+      console.log(taskInputChange)
+      console.log(taskInputChange.value);
+      this.clickButton(taskChangeInput, toDoTitle, taskInputChange.value)
+    })
+
+    taskChange.addEventListener("click", () => {
+      this.changeTask(taskChangeInput, toDoTitle);
+    });
+
     taskCheck.addEventListener("click", () => {
-      if (taskCheck.classList.contains("checkbox__active")) {
-        taskCheck.classList.remove("checkbox__active");
-        this.removeTask(toDoTask, task);
-        this.tasksList.prepend(toDoTask);
-      } else {
-        taskCheck.classList.add("checkbox__active");
-        this.removeTask(toDoTask, task);
-        this.tasksList.append(toDoTask);
-      }
-      this.setTaskToLocalStorage(task);
+      this.checkTask(taskCheck,toDoTask,task);
     });
 
     taskRemove.addEventListener("click", () => {
@@ -68,6 +86,30 @@ export default class Task {
     if (!isPageLoaded) {
       this.setTaskToLocalStorage(task);
     }
+  }
+
+  clickButton(taskChangeInput, toDoTitle, value) {
+    console.log(value)
+    toDoTitle.style.display = 'block';
+    toDoTitle.textContent = value;
+    taskChangeInput.classList.remove('task__change__active');
+  }
+  changeTask(taskChangeInput, toDoTitle) {
+    toDoTitle.style.display = 'none';
+    taskChangeInput.classList.add('task__change__active');
+  }
+
+  checkTask(taskCheck,toDoTask,task) {
+    if (taskCheck.classList.contains("checkbox__active")) {
+      taskCheck.classList.remove("checkbox__active");
+      this.removeTask(toDoTask, task);
+      this.tasksList.prepend(toDoTask);
+    } else {
+      taskCheck.classList.add("checkbox__active");
+      this.removeTask(toDoTask, task);
+      this.tasksList.append(toDoTask);
+    }
+    this.setTaskToLocalStorage(task);
   }
 
   removeTask(taskHtml, task) {
