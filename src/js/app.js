@@ -1,4 +1,4 @@
-import Task from "./task";
+import TasksController from "./tasksController";
 
 const container = document.querySelector(".content");
-const todo = new Task(container);
+const todo = new TasksController(container);
