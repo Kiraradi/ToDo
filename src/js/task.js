@@ -1,4 +1,5 @@
 import SaveToDo from "./saveToDo";
+import Sortable from "sortablejs";
 
 export default class Task {
   constructor(container) {
@@ -7,6 +8,7 @@ export default class Task {
     this.tasksList = container.querySelector("#tasks__list");
     this.loadPage();
     this.createTasks();
+    this.dregAndDrop();
   }
 
   loadPage() {
@@ -31,6 +33,7 @@ export default class Task {
 
   createHtmlElement(task, status, isPageLoaded) {
     const toDoTask = document.createElement("div");
+    toDoTask.setAttribute('draggable','true')
     toDoTask.classList.add("task");
 
     const toDoTitle = document.createElement("div");
@@ -136,5 +139,11 @@ export default class Task {
       tasks.splice(index, 1);
       SaveToDo.setTasksToLocalStorage(tasks);
     }
+  }
+
+  dregAndDrop() {
+    new Sortable(this.tasksList, {
+      animation: 300
+    } ) 
   }
 }
