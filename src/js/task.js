@@ -1,3 +1,5 @@
+import SaveToDo from "./saveToDo";
+
 export default class Task {
   constructor(container) {
     this.tasksInput = container.querySelector("#task__input");
@@ -8,10 +10,10 @@ export default class Task {
   }
 
   loadPage() {
-    const tasks = this.getTasksFromLocalStorage();
+    const tasks = SaveToDo.getTasksFromLocalStorage();
     if (tasks.length > 0) {
-      tasks.forEach((task) => {
-        this.createHtmlElement(task, true);
+      tasks.forEach((saveTask) => {
+        this.createHtmlElement(saveTask.task, saveTask.status, true);
       });
     }
   }
@@ -21,13 +23,13 @@ export default class Task {
       element.addEventListener("click", (event) => {
         event.preventDefault();
         if (this.tasksInput.value) {
-          this.createHtmlElement(this.tasksInput.value, false);
+          this.createHtmlElement(this.tasksInput.value, false, false);
         }
       });
     });
   }
 
-  createHtmlElement(task, isPageLoaded) {
+  createHtmlElement(task, status, isPageLoaded) {
     const toDoTask = document.createElement("div");
     toDoTask.classList.add("task");
 
@@ -37,23 +39,26 @@ export default class Task {
     toDoTask.appendChild(toDoTitle);
 
     const taskChangeInput = document.createElement("form");
-    taskChangeInput.classList.add('task__change');
+    taskChangeInput.classList.add("task__change");
     const taskInputChange = document.createElement("input");
-    taskInputChange.setAttribute('type','text');
-    taskInputChange.classList.add('task__input__change');
+    taskInputChange.setAttribute("type", "text");
+    taskInputChange.classList.add("task__input__change");
     taskChangeInput.appendChild(taskInputChange);
-    const taskInputButton = document.createElement('button');
-    taskInputButton.setAttribute('type','submit');
-    taskInputButton.classList.add('task__input__button');
+    const taskInputButton = document.createElement("button");
+    taskInputButton.setAttribute("type", "submit");
+    taskInputButton.classList.add("task__input__button");
     taskChangeInput.appendChild(taskInputButton);
     toDoTask.appendChild(taskChangeInput);
 
     const taskChange = document.createElement("div");
     taskChange.classList.add("change");
     toDoTask.appendChild(taskChange);
-    
+
     const taskCheck = document.createElement("div");
     taskCheck.classList.add("checkbox");
+    if (status) {
+      taskCheck.classList.add("checkbox__active");
+    }
     toDoTask.appendChild(taskCheck);
 
     const taskRemove = document.createElement("a");
@@ -64,19 +69,18 @@ export default class Task {
     this.tasksList.appendChild(toDoTask);
     this.tasksInput.value = "";
 
-    taskInputButton.addEventListener('click', () => {
-      //metod
-      console.log(taskInputChange)
-      console.log(taskInputChange.value);
-      this.clickButton(taskChangeInput, toDoTitle, taskInputChange.value)
-    })
+    taskInputButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      this.clickButton(taskChangeInput, toDoTitle, taskInputChange.value);
+      taskInputChange.value = "";
+    });
 
     taskChange.addEventListener("click", () => {
       this.changeTask(taskChangeInput, toDoTitle);
     });
 
     taskCheck.addEventListener("click", () => {
-      this.checkTask(taskCheck,toDoTask,task);
+      this.checkTask(taskCheck, toDoTask);
     });
 
     taskRemove.addEventListener("click", () => {
@@ -84,58 +88,53 @@ export default class Task {
     });
 
     if (!isPageLoaded) {
-      this.setTaskToLocalStorage(task);
+      SaveToDo.setTaskToLocalStorage(task, false);
     }
   }
 
   clickButton(taskChangeInput, toDoTitle, value) {
-    console.log(value)
-    toDoTitle.style.display = 'block';
+    const tasks = SaveToDo.getTasksFromLocalStorage();
+    const index = tasks.findIndex((saveTask) => saveTask.task === toDoTitle.textContent);
+    tasks[index].task = value;
+    SaveToDo.setTasksToLocalStorage(tasks);
+    toDoTitle.style.display = "block";
     toDoTitle.textContent = value;
-    taskChangeInput.classList.remove('task__change__active');
-  }
-  changeTask(taskChangeInput, toDoTitle) {
-    toDoTitle.style.display = 'none';
-    taskChangeInput.classList.add('task__change__active');
+    taskChangeInput.classList.remove("task__change__active");
   }
 
-  checkTask(taskCheck,toDoTask,task) {
+  changeTask(taskChangeInput, toDoTitle) {
+    if (taskChangeInput.classList.contains("task__change__active")) {
+      toDoTitle.style.display = "block";
+      taskChangeInput.classList.remove("task__change__active");
+    } else {
+      toDoTitle.style.display = "none";
+      taskChangeInput.classList.add("task__change__active");
+    }
+  }
+
+  checkTask(taskCheck, toDoTask) {
+    const value = toDoTask.querySelector(".task__title").textContent;
     if (taskCheck.classList.contains("checkbox__active")) {
       taskCheck.classList.remove("checkbox__active");
-      this.removeTask(toDoTask, task);
+      this.removeTask(toDoTask, value);
       this.tasksList.prepend(toDoTask);
+      SaveToDo.setTaskToLocalStorage(value, false);
     } else {
       taskCheck.classList.add("checkbox__active");
-      this.removeTask(toDoTask, task);
+      this.removeTask(toDoTask, value);
       this.tasksList.append(toDoTask);
+      SaveToDo.setTaskToLocalStorage(value,true);
     }
-    this.setTaskToLocalStorage(task);
+    
   }
 
   removeTask(taskHtml, task) {
     taskHtml.remove();
-    const tasks = this.getTasksFromLocalStorage();
-    const index = tasks.findIndex((el) => el === task);
+    const tasks = SaveToDo.getTasksFromLocalStorage();
+    const index = tasks.findIndex((saveTask) => saveTask.task === task);
     if (index >= 0) {
       tasks.splice(index, 1);
-      this.setTasksToLocalStorage(tasks);
+      SaveToDo.setTasksToLocalStorage(tasks);
     }
-  }
-
-  setTaskToLocalStorage(task) {
-    const tasksString = localStorage.getItem("task");
-    const tasks = tasksString ? JSON.parse(tasksString) : [];
-    tasks.push(task);
-    localStorage.setItem("task", JSON.stringify(tasks));
-  }
-
-  getTasksFromLocalStorage() {
-    const tasksString = localStorage.getItem("task");
-    const tasks = tasksString ? JSON.parse(tasksString) : [];
-    return tasks;
-  }
-
-  setTasksToLocalStorage(tasks) {
-    localStorage.setItem("task", JSON.stringify(tasks));
   }
 }
