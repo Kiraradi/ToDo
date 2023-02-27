@@ -8,7 +8,7 @@ export default class Task {
     this.tasksList = container.querySelector("#tasks__list");
     this.loadPage();
     this.createTasks();
-    this.dregAndDrop();
+    this.dragAndDrop();
   }
 
   loadPage() {
@@ -33,7 +33,6 @@ export default class Task {
 
   createHtmlElement(task, status, isPageLoaded) {
     const toDoTask = document.createElement("div");
-    toDoTask.setAttribute('draggable','true')
     toDoTask.classList.add("task");
 
     const toDoTitle = document.createElement("div");
@@ -97,7 +96,9 @@ export default class Task {
 
   clickButton(taskChangeInput, toDoTitle, value) {
     const tasks = SaveToDo.getTasksFromLocalStorage();
-    const index = tasks.findIndex((saveTask) => saveTask.task === toDoTitle.textContent);
+    const index = tasks.findIndex(
+      (saveTask) => saveTask.task === toDoTitle.textContent
+    );
     tasks[index].task = value;
     SaveToDo.setTasksToLocalStorage(tasks);
     toDoTitle.style.display = "block";
@@ -126,9 +127,8 @@ export default class Task {
       taskCheck.classList.add("checkbox__active");
       this.removeTask(toDoTask, value);
       this.tasksList.append(toDoTask);
-      SaveToDo.setTaskToLocalStorage(value,true);
+      SaveToDo.setTaskToLocalStorage(value, true);
     }
-    
   }
 
   removeTask(taskHtml, task) {
@@ -141,9 +141,9 @@ export default class Task {
     }
   }
 
-  dregAndDrop() {
+  dragAndDrop() {
     new Sortable(this.tasksList, {
-      animation: 300
-    } ) 
+      animation: 300,
+    });
   }
 }

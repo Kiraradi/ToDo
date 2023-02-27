@@ -2,7 +2,7 @@ export default class SaveToDo {
   static setTaskToLocalStorage(task, status = false) {
     const tasksString = localStorage.getItem("task");
     const tasks = tasksString ? JSON.parse(tasksString) : [];
-    tasks.push({task: task, status: status});
+    tasks.push({ task: task, status: status });
     localStorage.setItem("task", JSON.stringify(tasks));
   }
 
